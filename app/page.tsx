@@ -7,7 +7,7 @@ import { Database } from '@/database.types';
 import { convertPuzzleString } from '@/app/utils/convertPuzzleString';
 import TableRow from '@/app/components/TableRow';
 import TableData from '@/app/components/TableData';
-import { initPuzzleData } from '@/app/utils/initPuzzleData';
+import Spinner from '@/app/components/Spinner';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,11 +16,16 @@ const supabase = createClient<Database>(
 
 const nineItems = Array.from(Array(9).keys());
 
+function getRandomInt(max: number) {
+  return Math.floor(Math.random() * max);
+}
+
 export default function Home() {
   const [puzzleData, setPuzzleData] = useState<Puzzle[]>([]);
   const [sudokuData, setSudokuData] = useState<string[][] | undefined>(
     undefined
   );
+  const [isLoading, setIsLoading] = useState(false);
   // const [age, setAge] = useState(0)
   //
   // const handleChange = (e) => {
@@ -29,17 +34,16 @@ export default function Home() {
   // }
 
   useEffect(() => {
-    const transformedPuzzleData = convertPuzzleString(initPuzzleData);
-    setSudokuData(transformedPuzzleData);
-
     const init = async () => {
+      setIsLoading(true);
       const { data, error } = await supabase.from('sudoku_puzzles').select();
       if (!data) {
         console.log('No saved data in database');
         return;
       }
-
+      setIsLoading(false);
       setPuzzleData(data);
+      onUsePuzzleData(data[getRandomInt(5)]);
     };
 
     init();
@@ -89,15 +93,19 @@ export default function Home() {
         <div className="mt-10">
           <h3 className="text-white text-xl">Load Puzzles from the Server</h3>
           <div className="flex gap-4 mt-2">
-            {puzzleData.map((data, idx) => (
-              <button
-                onClick={() => onUsePuzzleData(data)}
-                key={data.id}
-                className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-              >
-                Puzzle {idx}
-              </button>
-            ))}
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              puzzleData.map((data, idx) => (
+                <button
+                  onClick={() => onUsePuzzleData(data)}
+                  key={data.id}
+                  className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+                >
+                  Puzzle {idx + 1}
+                </button>
+              ))
+            )}
           </div>
         </div>
       </div>

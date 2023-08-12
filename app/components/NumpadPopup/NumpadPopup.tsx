@@ -8,6 +8,7 @@ type NumpadPopupProps = {
   rowIndex: number;
   colIndex: number;
   children: JSX.Element;
+  onSelectNumber: (num: string, rowIdx: number, colIdx: number) => void;
 };
 const nineItems = Array.from(Array(9).keys());
 
@@ -16,12 +17,9 @@ const NumpadPopup: React.FC<NumpadPopupProps> = ({
   isPopoverOpen,
   rowIndex,
   colIndex,
+  onSelectNumber,
   children,
 }) => {
-  const onClick = () => {
-    setIsPopoverOpen('');
-  };
-
   return (
     <Popover
       padding={5}
@@ -41,7 +39,12 @@ const NumpadPopup: React.FC<NumpadPopupProps> = ({
         >
           <div className="bg-white p-5 border-2 border-gray-500 border-solid grid grid-cols-3 gap-1 justify-center items-center">
             {nineItems.map((item) => (
-              <Button key={item + 1} onClick={onClick}>
+              <Button
+                key={item + 1}
+                onClick={() =>
+                  onSelectNumber(String(item + 1), rowIndex, colIndex)
+                }
+              >
                 {item + 1}
               </Button>
             ))}

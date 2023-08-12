@@ -9,6 +9,7 @@ import TableData from '@/app/components/TableData';
 import Spinner from '@/app/components/Spinner';
 import Field from './components/Field';
 import NumpadPopup from '@/app/components/NumpadPopup';
+import { deepCopy } from '@/app/utils/deepCopy';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,17 +24,14 @@ function getRandomInt(max: number) {
 
 export default function Home() {
   const [isPopoverOpen, setIsPopoverOpen] = useState('');
-  const [puzzleData, setPuzzleData] = useState<Puzzle[]>([]);
+  const [fromServerPuzzle, setFromServerPuzzle] = useState<Puzzle[]>([]);
+  const [initializedData, setInitializedData] = useState<
+    string[][] | undefined
+  >(undefined);
   const [sudokuData, setSudokuData] = useState<string[][] | undefined>(
     undefined
   );
   const [isLoading, setIsLoading] = useState(false);
-  // const [age, setAge] = useState(0)
-  //
-  // const handleChange = (e) => {
-  //   const value = e.target.value.replace(/\D/g, '')
-  //   setAge(value)
-  // }
 
   useEffect(() => {
     const init = async () => {
@@ -44,7 +42,7 @@ export default function Home() {
         return;
       }
       setIsLoading(false);
-      setPuzzleData(data);
+      setFromServerPuzzle(data);
       onUsePuzzleData(data[getRandomInt(5)]);
     };
 
@@ -53,7 +51,8 @@ export default function Home() {
 
   const onUsePuzzleData = (data: Puzzle) => {
     const transformedPuzzleData = convertPuzzleString(data.puzzle);
-    setSudokuData(transformedPuzzleData);
+    setSudokuData(deepCopy<string[][]>(transformedPuzzleData));
+    setInitializedData(deepCopy<string[][]>(transformedPuzzleData));
   };
 
   const inputValue = useCallback(
@@ -67,13 +66,24 @@ export default function Home() {
 
   const handlePopoverOpen = useCallback(
     (row: number, col: number, rowIdx: number, colIdx: number) => {
-      if (!sudokuData) return;
-      if (sudokuData[row][col] === '.') {
+      if (!initializedData) return;
+      if (initializedData[row][col] === '.') {
         setIsPopoverOpen(String(rowIdx) + String(colIdx));
       }
     },
-    [sudokuData]
+    [initializedData]
   );
+
+  const onSelectNumber = (
+    numString: string,
+    rowIdx: number,
+    colIdx: number
+  ) => {
+    setIsPopoverOpen('');
+    if (!sudokuData) return;
+    sudokuData[rowIdx][colIdx] = numString;
+    setSudokuData(sudokuData);
+  };
 
   return (
     <div className="grid h-screen place-items-center">
@@ -90,6 +100,7 @@ export default function Home() {
                   {nineItems.map((col, colIndex) => (
                     <TableData key={rowIndex + colIndex} col={col}>
                       <NumpadPopup
+                        onSelectNumber={onSelectNumber}
                         colIndex={colIndex}
                         rowIndex={rowIndex}
                         isPopoverOpen={isPopoverOpen}
@@ -103,7 +114,9 @@ export default function Home() {
                           <Field
                             value={inputValue(row, col)}
                             disabled={
-                              sudokuData ? sudokuData[row][col] !== '.' : false
+                              initializedData
+                                ? initializedData[row][col] !== '.'
+                                : false
                             }
                           />
                         </div>
@@ -121,7 +134,7 @@ export default function Home() {
             {isLoading ? (
               <Spinner />
             ) : (
-              puzzleData.map((data, idx) => (
+              fromServerPuzzle.map((data, idx) => (
                 <button
                   onClick={() => onUsePuzzleData(data)}
                   key={data.id}

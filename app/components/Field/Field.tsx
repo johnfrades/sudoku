@@ -11,7 +11,7 @@ const Field: React.FC<InputProps> = ({ value, disabled }) => {
     : 'bg-white cursor-pointer hover:bg-green-100';
   return (
     <div
-      className={`border flex items-center justify-center w-14 h-14 md:w-20 md:h-20 text-lg md:text-2xl ${conditionalClass}`}
+      className={`select-none border flex items-center justify-center w-14 h-14 md:w-20 md:h-20 text-lg md:text-2xl ${conditionalClass}`}
     >
       {value}
     </div>

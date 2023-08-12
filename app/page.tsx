@@ -1,13 +1,14 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import Input from './components/Input';
 import { Puzzle } from '@/app/types/puzzle';
 import { Database } from '@/database.types';
 import { convertPuzzleString } from '@/app/utils/convertPuzzleString';
 import TableRow from '@/app/components/TableRow';
 import TableData from '@/app/components/TableData';
 import Spinner from '@/app/components/Spinner';
+import Field from './components/Field';
+import NumpadPopup from '@/app/components/NumpadPopup';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,6 +22,7 @@ function getRandomInt(max: number) {
 }
 
 export default function Home() {
+  const [isPopoverOpen, setIsPopoverOpen] = useState('');
   const [puzzleData, setPuzzleData] = useState<Puzzle[]>([]);
   const [sudokuData, setSudokuData] = useState<string[][] | undefined>(
     undefined
@@ -63,12 +65,23 @@ export default function Home() {
     [sudokuData]
   );
 
+  const handlePopoverOpen = useCallback(
+    (row: number, col: number, rowIdx: number, colIdx: number) => {
+      if (!sudokuData) return;
+      if (sudokuData[row][col] === '.') {
+        setIsPopoverOpen(String(rowIdx) + String(colIdx));
+      }
+    },
+    [sudokuData]
+  );
+
   return (
     <div className="grid h-screen place-items-center">
       <div>
         <h1 className="text-4xl font-semibold text-white text-center">
           Sudoku-Mobbin
         </h1>
+
         <table className="mt-10 border-collapse border-4 border-solid border-gray-400">
           <tbody>
             {nineItems.map((row, rowIndex) => {
@@ -76,12 +89,25 @@ export default function Home() {
                 <TableRow key={rowIndex} row={row}>
                   {nineItems.map((col, colIndex) => (
                     <TableData key={rowIndex + colIndex} col={col}>
-                      <Input
-                        value={inputValue(row, col)}
-                        disabled={
-                          sudokuData ? sudokuData[row][col] !== '.' : false
-                        }
-                      />
+                      <NumpadPopup
+                        colIndex={colIndex}
+                        rowIndex={rowIndex}
+                        isPopoverOpen={isPopoverOpen}
+                        setIsPopoverOpen={setIsPopoverOpen}
+                      >
+                        <div
+                          onClick={() =>
+                            handlePopoverOpen(row, col, rowIndex, colIndex)
+                          }
+                        >
+                          <Field
+                            value={inputValue(row, col)}
+                            disabled={
+                              sudokuData ? sudokuData[row][col] !== '.' : false
+                            }
+                          />
+                        </div>
+                      </NumpadPopup>
                     </TableData>
                   ))}
                 </TableRow>
@@ -89,7 +115,6 @@ export default function Home() {
             })}
           </tbody>
         </table>
-
         <div className="mt-10">
           <h3 className="text-white text-xl">Load Puzzles from the Server</h3>
           <div className="flex gap-4 mt-2">

@@ -1,20 +1,26 @@
-export const convertPuzzleString = (puzzleString: string): string[][] => {
-  const splitData = puzzleString.split('')
-  const puzzleArr: string[][] = []
-  let row = 0
+import { SudokuData } from '@/app/types/SudokuData';
+
+export const convertPuzzleString = (puzzleString: string): SudokuData[][] => {
+  const splitData = puzzleString.split('');
+  const puzzleArr: SudokuData[][] = [];
+  let row = 0;
 
   splitData.forEach((sData, idx) => {
-    const isLastCellOnTheRow = idx % 9 === 0
+    const isLastCellOnTheRow = idx % 9 === 0;
     if (idx !== 0 && isLastCellOnTheRow) {
-      row = row + 1
+      row = row + 1;
     }
 
     if (!Array.isArray(puzzleArr[row])) {
-      puzzleArr.push([])
+      puzzleArr.push([]);
     }
 
-    puzzleArr[row].push(sData)
-  })
+    puzzleArr[row].push({
+      value: sData,
+      hasError: false,
+      isDisabled: sData !== '.',
+    });
+  });
 
-  return puzzleArr
-}
+  return puzzleArr;
+};

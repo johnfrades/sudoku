@@ -10,6 +10,9 @@ import Spinner from '@/app/components/Spinner';
 import Field from './components/Field';
 import NumpadPopup from '@/app/components/NumpadPopup';
 import { deepCopy } from '@/app/utils/deepCopy';
+import { getRandomInt } from '@/app/utils/getRandomInt';
+import { SudokuData } from '@/app/types/SudokuData';
+import { get } from 'lodash';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,20 +21,46 @@ const supabase = createClient<Database>(
 
 const nineItems = Array.from(Array(9).keys());
 
-function getRandomInt(max: number) {
-  return Math.floor(Math.random() * max);
-}
-
 export default function Home() {
   const [isPopoverOpen, setIsPopoverOpen] = useState('');
   const [fromServerPuzzle, setFromServerPuzzle] = useState<Puzzle[]>([]);
-  const [initializedData, setInitializedData] = useState<
-    string[][] | undefined
-  >(undefined);
-  const [sudokuData, setSudokuData] = useState<string[][] | undefined>(
-    undefined
-  );
+  const [sudokuData, setSudokuData] = useState<SudokuData[][]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const validateTheRowCol = (row: number, col: number, value: string) => {
+    const rowToValidate = deepCopy(sudokuData[row]);
+    const columnToValidate = deepCopy(sudokuData.map((data) => data[col]));
+    const existsInRow = rowToValidate.findIndex((x) => x.value === value);
+    const existsInCol = columnToValidate.findIndex((x) => x.value === value);
+
+    if (existsInRow >= 0 || existsInCol >= 0) {
+      const newCopy = deepCopy(sudokuData);
+
+      if (existsInCol >= 0) {
+        const rowToBeError = existsInCol >= 0 ? existsInCol : 0;
+        newCopy[rowToBeError][col] = {
+          ...newCopy[rowToBeError][col],
+          hasError: true,
+        };
+      }
+
+      if (existsInRow >= 0) {
+        const colToBeError = existsInRow >= 0 ? existsInRow : 0;
+        newCopy[row][colToBeError] = {
+          ...newCopy[row][colToBeError],
+          hasError: true,
+        };
+      }
+
+      newCopy[row][col] = {
+        value,
+        isDisabled: false,
+        hasError: true,
+      };
+
+      setSudokuData(newCopy);
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -51,27 +80,26 @@ export default function Home() {
 
   const onUsePuzzleData = (data: Puzzle) => {
     const transformedPuzzleData = convertPuzzleString(data.puzzle);
-    setSudokuData(deepCopy<string[][]>(transformedPuzzleData));
-    setInitializedData(deepCopy<string[][]>(transformedPuzzleData));
+    setSudokuData(deepCopy(transformedPuzzleData));
   };
 
   const inputValue = useCallback(
     (row: number, col: number) => {
-      if (!sudokuData) return '';
-      if (sudokuData[row][col] === '.') return '';
-      return sudokuData[row][col];
+      if (sudokuData?.length === 0) return '';
+      if (sudokuData[row][col].value === '.') return '';
+      return sudokuData[row][col].value;
     },
     [sudokuData]
   );
 
   const handlePopoverOpen = useCallback(
     (row: number, col: number, rowIdx: number, colIdx: number) => {
-      if (!initializedData) return;
-      if (initializedData[row][col] === '.') {
+      if (sudokuData?.length === 0) return;
+      if (!sudokuData[row][col].isDisabled) {
         setIsPopoverOpen(String(rowIdx) + String(colIdx));
       }
     },
-    [initializedData]
+    [sudokuData]
   );
 
   const onSelectNumber = (
@@ -81,8 +109,7 @@ export default function Home() {
   ) => {
     setIsPopoverOpen('');
     if (!sudokuData) return;
-    sudokuData[rowIdx][colIdx] = numString;
-    setSudokuData(sudokuData);
+    validateTheRowCol(rowIdx, colIdx, numString);
   };
 
   return (
@@ -112,12 +139,17 @@ export default function Home() {
                           }
                         >
                           <Field
+                            hasError={get(
+                              sudokuData,
+                              `[${row}][${col}].hasError`,
+                              false
+                            )}
                             value={inputValue(row, col)}
-                            disabled={
-                              initializedData
-                                ? initializedData[row][col] !== '.'
-                                : false
-                            }
+                            disabled={get(
+                              sudokuData,
+                              `[${row}][${col}].isDisabled`,
+                              true
+                            )}
                           />
                         </div>
                       </NumpadPopup>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowContainer, Popover } from 'react-tiny-popover';
-import Button from '@/app/components/Button';
+import Button from '../Button';
 
 type NumpadPopupProps = {
   setIsPopoverOpen: (val: string) => void;

@@ -1,4 +1,4 @@
-import { SudokuData } from '@/app/types/SudokuData';
+import { SudokuData } from '@/types/sudokuData';
 
 export const convertPuzzleString = (puzzleString: string): SudokuData[][] => {
   const splitData = puzzleString.split('');
@@ -19,6 +19,8 @@ export const convertPuzzleString = (puzzleString: string): SudokuData[][] => {
       value: sData,
       hasError: false,
       isDisabled: sData !== '.',
+      row: row,
+      col: idx % 9,
     });
   });
 

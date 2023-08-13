@@ -1,17 +1,17 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Puzzle } from '@/app/types/puzzle';
+import { Puzzle } from '@/types/puzzle';
 import { Database } from '@/database.types';
-import { convertPuzzleString } from '@/app/utils/convertPuzzleString';
-import TableRow from '@/app/components/TableRow';
-import TableData from '@/app/components/TableData';
-import Spinner from '@/app/components/Spinner';
-import Field from './components/Field';
-import NumpadPopup from '@/app/components/NumpadPopup';
-import { deepCopy } from '@/app/utils/deepCopy';
-import { getRandomInt } from '@/app/utils/getRandomInt';
-import { SudokuData } from '@/app/types/SudokuData';
+import { convertPuzzleString } from '@/utils/convertPuzzleString';
+import TableRow from '../components/TableRow';
+import TableData from '../components/TableData';
+import Spinner from '../components/Spinner';
+import Field from '../components/Field';
+import NumpadPopup from '../components/NumpadPopup';
+import { deepCopy } from '@/utils/deepCopy';
+import { getRandomInt } from '@/utils/getRandomInt';
+import { SudokuData } from '@/types/sudokuData';
 import { get } from 'lodash';
 
 const supabase = createClient<Database>(
@@ -32,34 +32,64 @@ export default function Home() {
     const columnToValidate = deepCopy(sudokuData.map((data) => data[col]));
     const existsInRow = rowToValidate.findIndex((x) => x.value === value);
     const existsInCol = columnToValidate.findIndex((x) => x.value === value);
+    const newCopy = deepCopy(sudokuData);
 
-    if (existsInRow >= 0 || existsInCol >= 0) {
-      const newCopy = deepCopy(sudokuData);
-
-      if (existsInCol >= 0) {
-        const rowToBeError = existsInCol >= 0 ? existsInCol : 0;
-        newCopy[rowToBeError][col] = {
-          ...newCopy[rowToBeError][col],
-          hasError: true,
-        };
-      }
-
-      if (existsInRow >= 0) {
-        const colToBeError = existsInRow >= 0 ? existsInRow : 0;
-        newCopy[row][colToBeError] = {
-          ...newCopy[row][colToBeError],
-          hasError: true,
-        };
-      }
-
-      newCopy[row][col] = {
-        value,
-        isDisabled: false,
+    if (existsInCol >= 0) {
+      const rowToBeError = existsInCol >= 0 ? existsInCol : 0;
+      newCopy[rowToBeError][col] = {
+        ...newCopy[rowToBeError][col],
         hasError: true,
       };
-
-      setSudokuData(newCopy);
     }
+    if (existsInRow >= 0) {
+      const colToBeError = existsInRow >= 0 ? existsInRow : 0;
+      newCopy[row][colToBeError] = {
+        ...newCopy[row][colToBeError],
+        hasError: true,
+      };
+    }
+
+    newCopy[row][col] = {
+      ...newCopy[row][col],
+      value,
+      isDisabled: false,
+      hasError: true,
+    };
+
+    const allExistingErrors = newCopy.reduce((acc, cur) => {
+      const errors = cur.filter((x) => x.hasError);
+      if (errors.length > 0) {
+        errors.forEach((error) => {
+          acc.push(error);
+        });
+      }
+
+      return acc;
+    }, []);
+
+    validateTheExistingErrors(allExistingErrors, newCopy);
+    setSudokuData(newCopy);
+  };
+
+  const validateTheExistingErrors = (
+    dataWithErrors: SudokuData[],
+    newCopy: SudokuData[][]
+  ) => {
+    dataWithErrors.forEach(({ row, col, value }) => {
+      const rowToValidate = deepCopy(newCopy[row]);
+      rowToValidate[col].value = '.';
+      const columnToValidate = deepCopy(newCopy.map((data) => data[col]));
+      columnToValidate[row].value = '.';
+      const existsInRow = rowToValidate.findIndex((x) => x.value === value);
+      const existsInCol = columnToValidate.findIndex((x) => x.value === value);
+
+      if (existsInRow === -1 && existsInCol === -1) {
+        newCopy[row][col] = {
+          ...newCopy[row][col],
+          hasError: false,
+        };
+      }
+    });
   };
 
   useEffect(() => {

@@ -10,9 +10,9 @@ import Spinner from '../components/Spinner';
 import Field from '../components/Field';
 import NumpadPopup from '../components/NumpadPopup';
 import { deepCopy } from '@/utils/deepCopy';
-import { getRandomInt } from '@/utils/getRandomInt';
 import { SudokuData } from '@/types/sudokuData';
 import { get } from 'lodash';
+import { generateSudokuData } from '@/utils/generateSudokuData';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -102,10 +102,12 @@ export default function Home() {
       }
       setIsLoading(false);
       setFromServerPuzzle(data);
-      onUsePuzzleData(data[getRandomInt(5)]);
     };
 
     init();
+    const solvedString = generateSudokuData();
+    const transformedPuzzleData = convertPuzzleString(solvedString);
+    setSudokuData(deepCopy(transformedPuzzleData));
   }, []);
 
   const onUsePuzzleData = (data: Puzzle) => {

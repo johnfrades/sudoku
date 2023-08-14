@@ -6,14 +6,13 @@ export const generateSudokuData = (
   const emptySudoku = Array.from(Array(81).keys()).map(() => 0);
   const solvedSudoku = solve(emptySudoku);
   const puzzleString = solvedSudoku.map((x) => String(x)).join('');
-  const finalPuzzleString = digHoleInBoard(puzzleString, puzzleDifficulty);
-  return finalPuzzleString;
+  return digHoleInBoard(puzzleString, puzzleDifficulty);
 };
 
 const generateHoles = (maxNumber: number, size: number) => {
-  const randomNumber = () => Math.floor(Math.random() * (maxNumber + 1));
+  const randomNumber = () => Math.floor(Math.random() * maxNumber);
   let current: number;
-  const arr = [];
+  const arr: number[] = [];
 
   while (arr.length < size) {
     if (arr.indexOf((current = randomNumber())) === -1) {
@@ -144,7 +143,7 @@ function isCorrectBlock(block: number, sudoku: number[]) {
 }
 
 // given a sudoku, returns true if the sudoku is solved
-function isSolvedSudoku(sudoku: number[]) {
+export function isSolvedSudoku(sudoku: number[]) {
   for (let i = 0; i <= 8; i++) {
     if (
       !isCorrectBlock(i, sudoku) ||

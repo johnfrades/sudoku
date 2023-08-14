@@ -28,7 +28,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
         setIsPopoverOpen(String(rowIdx) + String(colIdx));
       }
     },
-    [sudokuData]
+    [setIsPopoverOpen, sudokuData]
   );
 
   const inputValue = useCallback(
@@ -40,37 +40,49 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
     [sudokuData]
   );
 
-  return nineItems.map((row, rowIndex) => {
-    return (
-      <TableRow key={rowIndex} row={row}>
-        {nineItems.map((col, colIndex) => (
-          <TableData key={rowIndex + colIndex} col={col}>
-            <NumpadPopup
-              onSelectNumber={onSelectNumber}
-              colIndex={colIndex}
-              rowIndex={rowIndex}
-              isPopoverOpen={isPopoverOpen}
-              setIsPopoverOpen={setIsPopoverOpen}
-            >
-              <div
-                onClick={() => handlePopoverOpen(row, col, rowIndex, colIndex)}
-              >
-                <Field
-                  hasError={get(sudokuData, `[${row}][${col}].hasError`, false)}
-                  value={inputValue(row, col)}
-                  disabled={get(
-                    sudokuData,
-                    `[${row}][${col}].isDisabled`,
-                    true
-                  )}
-                />
-              </div>
-            </NumpadPopup>
-          </TableData>
-        ))}
-      </TableRow>
-    );
-  });
+  return (
+    <table className="mt-10 border-collapse border-4 border-solid border-gray-400">
+      <tbody>
+        {nineItems.map((row, rowIndex) => {
+          return (
+            <TableRow key={rowIndex} row={row}>
+              {nineItems.map((col, colIndex) => (
+                <TableData key={rowIndex + colIndex} col={col}>
+                  <NumpadPopup
+                    onSelectNumber={onSelectNumber}
+                    colIndex={colIndex}
+                    rowIndex={rowIndex}
+                    isPopoverOpen={isPopoverOpen}
+                    setIsPopoverOpen={setIsPopoverOpen}
+                  >
+                    <div
+                      onClick={() =>
+                        handlePopoverOpen(row, col, rowIndex, colIndex)
+                      }
+                    >
+                      <Field
+                        hasError={get(
+                          sudokuData,
+                          `[${row}][${col}].hasError`,
+                          false
+                        )}
+                        value={inputValue(row, col)}
+                        disabled={get(
+                          sudokuData,
+                          `[${row}][${col}].isDisabled`,
+                          true
+                        )}
+                      />
+                    </div>
+                  </NumpadPopup>
+                </TableData>
+              ))}
+            </TableRow>
+          );
+        })}
+      </tbody>
+    </table>
+  );
 };
 
 export default SudokuBoard;

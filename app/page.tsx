@@ -6,11 +6,12 @@ import { Database } from '@/database.types';
 import { convertPuzzleString } from '@/utils/convertPuzzleString';
 import { deepCopy } from '@/utils/deepCopy';
 import { SudokuData } from '@/types/sudokuData';
-import { generateSudokuData } from '@/utils/generateSudokuData';
+import { generateSudokuData, isSolvedSudoku } from '@/utils/generateSudokuData';
 import { PuzzleDifficulty } from '@/enums/PuzzleDifficulty';
 import PuzzleDifficultyGroup from '@/components/PuzzleDifficultyGroup';
 import LoadPuzzlesFromServer from '@/components/LoadPuzzlesFromServer';
 import SudokuBoard from '@/components/SudokuBoard';
+import { flatten } from 'lodash';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,6 +24,7 @@ export default function Home() {
   const [sudokuData, setSudokuData] = useState<SudokuData[][]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPuzzle, setSelectedPuzzle] = useState('');
+  const [puzzleSolved, setPuzzleSolved] = useState(false);
 
   const validateTheRowCol = (row: number, col: number, value: string) => {
     const rowToValidate = deepCopy(sudokuData[row]);
@@ -30,7 +32,6 @@ export default function Home() {
     const existsInRow = rowToValidate.findIndex((x) => x.value === value);
     const existsInCol = columnToValidate.findIndex((x) => x.value === value);
     const newCopy = deepCopy(sudokuData);
-
     if (existsInCol >= 0) {
       const rowToBeError = existsInCol >= 0 ? existsInCol : 0;
       newCopy[rowToBeError][col] = {
@@ -122,9 +123,23 @@ export default function Home() {
     colIdx: number
   ) => {
     setIsPopoverOpen('');
-    if (!sudokuData) return;
     validateTheRowCol(rowIdx, colIdx, numString);
   };
+
+  useEffect(() => {
+    const mappedData = flatten(
+      sudokuData.map((x) =>
+        x.map((y) => {
+          if (isNaN(Number(y.value))) {
+            return 0;
+          }
+          return Number(y.value);
+        })
+      )
+    );
+    const solved = isSolvedSudoku(mappedData);
+    setPuzzleSolved(solved);
+  }, [sudokuData]);
 
   return (
     <div className="grid h-screen place-items-center">
@@ -133,19 +148,22 @@ export default function Home() {
           Sudoku-Mobbin
         </h1>
         <h6 className="text-center text-amber-100">
-          Playing {selectedPuzzle || 'Medium'}
+          Playing {selectedPuzzle || 'Medium'} Difficulty
         </h6>
 
-        <table className="mt-10 border-collapse border-4 border-solid border-gray-400">
-          <tbody>
-            <SudokuBoard
-              isPopoverOpen={isPopoverOpen}
-              onSelectNumber={onSelectNumber}
-              setIsPopoverOpen={setIsPopoverOpen}
-              sudokuData={sudokuData}
-            />
-          </tbody>
-        </table>
+        <SudokuBoard
+          isPopoverOpen={isPopoverOpen}
+          onSelectNumber={onSelectNumber}
+          setIsPopoverOpen={setIsPopoverOpen}
+          sudokuData={sudokuData}
+        />
+
+        {puzzleSolved && (
+          <h2 className="my-5 text-3xl font-bold text-green-500 text-center">
+            Congratulations for solving this puzzle!
+            <br /> Play again
+          </h2>
+        )}
 
         <div className="mt-10">
           <PuzzleDifficultyGroup

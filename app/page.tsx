@@ -1,31 +1,28 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Puzzle } from '@/types/puzzle';
 import { Database } from '@/database.types';
 import { convertPuzzleString } from '@/utils/convertPuzzleString';
-import TableRow from '../components/TableRow';
-import TableData from '../components/TableData';
-import Spinner from '../components/Spinner';
-import Field from '../components/Field';
-import NumpadPopup from '../components/NumpadPopup';
 import { deepCopy } from '@/utils/deepCopy';
 import { SudokuData } from '@/types/sudokuData';
-import { get } from 'lodash';
 import { generateSudokuData } from '@/utils/generateSudokuData';
+import { PuzzleDifficulty } from '@/enums/PuzzleDifficulty';
+import PuzzleDifficultyGroup from '@/components/PuzzleDifficultyGroup';
+import LoadPuzzlesFromServer from '@/components/LoadPuzzlesFromServer';
+import SudokuBoard from '@/components/SudokuBoard';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const nineItems = Array.from(Array(9).keys());
-
 export default function Home() {
   const [isPopoverOpen, setIsPopoverOpen] = useState('');
   const [fromServerPuzzle, setFromServerPuzzle] = useState<Puzzle[]>([]);
   const [sudokuData, setSudokuData] = useState<SudokuData[][]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPuzzle, setSelectedPuzzle] = useState('');
 
   const validateTheRowCol = (row: number, col: number, value: string) => {
     const rowToValidate = deepCopy(sudokuData[row]);
@@ -103,36 +100,21 @@ export default function Home() {
       setIsLoading(false);
       setFromServerPuzzle(data);
     };
-
     init();
-    const solvedString = generateSudokuData();
+
+    onGenerateRandomSudoku(PuzzleDifficulty.MEDIUM);
+  }, []);
+
+  const onGenerateRandomSudoku = (puzzleDifficulty: PuzzleDifficulty) => {
+    const solvedString = generateSudokuData(puzzleDifficulty);
     const transformedPuzzleData = convertPuzzleString(solvedString);
     setSudokuData(deepCopy(transformedPuzzleData));
-  }, []);
+  };
 
   const onUsePuzzleData = (data: Puzzle) => {
     const transformedPuzzleData = convertPuzzleString(data.puzzle);
     setSudokuData(deepCopy(transformedPuzzleData));
   };
-
-  const inputValue = useCallback(
-    (row: number, col: number) => {
-      if (sudokuData?.length === 0) return '';
-      if (sudokuData[row][col].value === '.') return '';
-      return sudokuData[row][col].value;
-    },
-    [sudokuData]
-  );
-
-  const handlePopoverOpen = useCallback(
-    (row: number, col: number, rowIdx: number, colIdx: number) => {
-      if (sudokuData?.length === 0) return;
-      if (!sudokuData[row][col].isDisabled) {
-        setIsPopoverOpen(String(rowIdx) + String(colIdx));
-      }
-    },
-    [sudokuData]
-  );
 
   const onSelectNumber = (
     numString: string,
@@ -150,65 +132,35 @@ export default function Home() {
         <h1 className="text-4xl font-semibold text-white text-center">
           Sudoku-Mobbin
         </h1>
+        <h6 className="text-center text-amber-100">
+          Playing {selectedPuzzle || 'Medium'}
+        </h6>
 
         <table className="mt-10 border-collapse border-4 border-solid border-gray-400">
           <tbody>
-            {nineItems.map((row, rowIndex) => {
-              return (
-                <TableRow key={rowIndex} row={row}>
-                  {nineItems.map((col, colIndex) => (
-                    <TableData key={rowIndex + colIndex} col={col}>
-                      <NumpadPopup
-                        onSelectNumber={onSelectNumber}
-                        colIndex={colIndex}
-                        rowIndex={rowIndex}
-                        isPopoverOpen={isPopoverOpen}
-                        setIsPopoverOpen={setIsPopoverOpen}
-                      >
-                        <div
-                          onClick={() =>
-                            handlePopoverOpen(row, col, rowIndex, colIndex)
-                          }
-                        >
-                          <Field
-                            hasError={get(
-                              sudokuData,
-                              `[${row}][${col}].hasError`,
-                              false
-                            )}
-                            value={inputValue(row, col)}
-                            disabled={get(
-                              sudokuData,
-                              `[${row}][${col}].isDisabled`,
-                              true
-                            )}
-                          />
-                        </div>
-                      </NumpadPopup>
-                    </TableData>
-                  ))}
-                </TableRow>
-              );
-            })}
+            <SudokuBoard
+              isPopoverOpen={isPopoverOpen}
+              onSelectNumber={onSelectNumber}
+              setIsPopoverOpen={setIsPopoverOpen}
+              sudokuData={sudokuData}
+            />
           </tbody>
         </table>
+
         <div className="mt-10">
-          <h3 className="text-white text-xl">Load Puzzles from the Server</h3>
-          <div className="flex gap-4 mt-2">
-            {isLoading ? (
-              <Spinner />
-            ) : (
-              fromServerPuzzle.map((data, idx) => (
-                <button
-                  onClick={() => onUsePuzzleData(data)}
-                  key={data.id}
-                  className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-                >
-                  Puzzle {idx + 1}
-                </button>
-              ))
-            )}
-          </div>
+          <PuzzleDifficultyGroup
+            setSelectedPuzzle={setSelectedPuzzle}
+            onGenerateRandomSudoku={onGenerateRandomSudoku}
+          />
+        </div>
+
+        <div className="mt-10">
+          <LoadPuzzlesFromServer
+            setSelectedPuzzle={setSelectedPuzzle}
+            isLoading={isLoading}
+            fromServerPuzzle={fromServerPuzzle}
+            onUsePuzzleData={onUsePuzzleData}
+          />
         </div>
       </div>
     </div>

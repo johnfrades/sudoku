@@ -1,7 +1,35 @@
-export const generateSudokuData = (): string => {
+import { PuzzleDifficulty } from '@/enums/PuzzleDifficulty';
+
+export const generateSudokuData = (
+  puzzleDifficulty: PuzzleDifficulty
+): string => {
   const emptySudoku = Array.from(Array(81).keys()).map(() => 0);
   const solvedSudoku = solve(emptySudoku);
-  return solvedSudoku.map((x) => String(x)).join('');
+  const puzzleString = solvedSudoku.map((x) => String(x)).join('');
+  const finalPuzzleString = digHoleInBoard(puzzleString, puzzleDifficulty);
+  return finalPuzzleString;
+};
+
+const generateHoles = (maxNumber: number, size: number) => {
+  const randomNumber = () => Math.floor(Math.random() * (maxNumber + 1));
+  let current: number;
+  const arr = [];
+
+  while (arr.length < size) {
+    if (arr.indexOf((current = randomNumber())) === -1) {
+      arr.push(current);
+    }
+  }
+  return arr;
+};
+
+const digHoleInBoard = (puzzleString: string, difficulty: PuzzleDifficulty) => {
+  const holesIndexes = generateHoles(81, difficulty);
+  const splittedPuzzle = puzzleString.split('');
+  holesIndexes.forEach((holeIdx) => {
+    splittedPuzzle[holeIdx] = '.';
+  });
+  return splittedPuzzle.join('');
 };
 
 // given a sudoku cell, returns the row

@@ -41,8 +41,8 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
   );
 
   return (
-    <table className="mt-10 border-collapse border-4 border-solid border-gray-400">
-      <tbody>
+    <table className="mt-10 border-collapse border-4 border-solid border-gray-300 select-none">
+      <tbody className="select-none">
         {nineItems.map((row, rowIndex) => {
           return (
             <TableRow key={rowIndex} row={row}>

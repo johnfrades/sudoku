@@ -25,9 +25,9 @@ const NumpadPopup: React.FC<NumpadPopupProps> = ({
       padding={5}
       onClickOutside={() => setIsPopoverOpen('')}
       isOpen={isPopoverOpen === String(rowIndex) + String(colIndex)}
-      positions={['top', 'bottom', 'left', 'right']} // preferred positions by priority
+      positions={['top', 'bottom', 'left', 'right']}
       content={({ position, childRect, popoverRect }) => (
-        <ArrowContainer // if you'd like an arrow, you can import the ArrowContainer!
+        <ArrowContainer
           position={position}
           childRect={childRect}
           popoverRect={popoverRect}
@@ -37,7 +37,7 @@ const NumpadPopup: React.FC<NumpadPopupProps> = ({
           className="popover-arrow-container"
           arrowClassName="popover-arrow"
         >
-          <div className="bg-white p-5 border-2 border-gray-500 border-solid grid grid-cols-3 gap-1 justify-center items-center">
+          <div className="bg-white px-5 py-6 border-2 rounded-lg border-gray-400 border-solid grid grid-cols-3 gap-1 justify-center items-center">
             {nineItems.map((item) => (
               <Button
                 key={item + 1}

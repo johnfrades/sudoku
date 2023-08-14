@@ -6,7 +6,7 @@ const TableData: React.FC<{
 }> = ({ col, children }) => (
   <td
     className={
-      (col + 1) % 3 === 0 ? 'border-gray-400 border-r-4 border-solid' : ''
+      (col + 1) % 3 === 0 ? 'border-gray-300 border-r-4 border-solid' : ''
     }
   >
     {children}

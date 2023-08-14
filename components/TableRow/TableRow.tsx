@@ -6,7 +6,7 @@ const TableRow: React.FC<{ row: number; children: ReactNode }> = ({
 }) => (
   <tr
     className={
-      (row + 1) % 3 === 0 ? 'border-gray-400 border-b-4 border-solid' : ''
+      (row + 1) % 3 === 0 ? 'border-gray-300 border-b-4 border-solid' : ''
     }
   >
     {' '}

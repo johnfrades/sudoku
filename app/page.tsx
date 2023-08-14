@@ -12,6 +12,7 @@ import PuzzleDifficultyGroup from '@/components/PuzzleDifficultyGroup';
 import LoadPuzzlesFromServer from '@/components/LoadPuzzlesFromServer';
 import SudokuBoard from '@/components/SudokuBoard';
 import { flatten } from 'lodash';
+import { useSudokuValidation } from '@/app/useSudokuValidation';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,69 +27,10 @@ export default function Home() {
   const [selectedPuzzle, setSelectedPuzzle] = useState('');
   const [puzzleSolved, setPuzzleSolved] = useState(false);
 
-  const validateTheRowCol = (row: number, col: number, value: string) => {
-    const rowToValidate = deepCopy(sudokuData[row]);
-    const columnToValidate = deepCopy(sudokuData.map((data) => data[col]));
-    const existsInRow = rowToValidate.findIndex((x) => x.value === value);
-    const existsInCol = columnToValidate.findIndex((x) => x.value === value);
-    const newCopy = deepCopy(sudokuData);
-    if (existsInCol >= 0) {
-      const rowToBeError = existsInCol >= 0 ? existsInCol : 0;
-      newCopy[rowToBeError][col] = {
-        ...newCopy[rowToBeError][col],
-        hasError: true,
-      };
-    }
-    if (existsInRow >= 0) {
-      const colToBeError = existsInRow >= 0 ? existsInRow : 0;
-      newCopy[row][colToBeError] = {
-        ...newCopy[row][colToBeError],
-        hasError: true,
-      };
-    }
-
-    newCopy[row][col] = {
-      ...newCopy[row][col],
-      value,
-      isDisabled: false,
-      hasError: true,
-    };
-
-    const allExistingErrors = newCopy.reduce((acc, cur) => {
-      const errors = cur.filter((x) => x.hasError);
-      if (errors.length > 0) {
-        errors.forEach((error) => {
-          acc.push(error);
-        });
-      }
-
-      return acc;
-    }, []);
-
-    validateTheExistingErrors(allExistingErrors, newCopy);
-    setSudokuData(newCopy);
-  };
-
-  const validateTheExistingErrors = (
-    dataWithErrors: SudokuData[],
-    newCopy: SudokuData[][]
-  ) => {
-    dataWithErrors.forEach(({ row, col, value }) => {
-      const rowToValidate = deepCopy(newCopy[row]);
-      rowToValidate[col].value = '.';
-      const columnToValidate = deepCopy(newCopy.map((data) => data[col]));
-      columnToValidate[row].value = '.';
-      const existsInRow = rowToValidate.findIndex((x) => x.value === value);
-      const existsInCol = columnToValidate.findIndex((x) => x.value === value);
-
-      if (existsInRow === -1 && existsInCol === -1) {
-        newCopy[row][col] = {
-          ...newCopy[row][col],
-          hasError: false,
-        };
-      }
-    });
-  };
+  const { validateBlockRowAndColumn } = useSudokuValidation(
+    sudokuData,
+    setSudokuData
+  );
 
   useEffect(() => {
     const init = async () => {
@@ -123,7 +65,7 @@ export default function Home() {
     colIdx: number
   ) => {
     setIsPopoverOpen('');
-    validateTheRowCol(rowIdx, colIdx, numString);
+    validateBlockRowAndColumn(rowIdx, colIdx, numString);
   };
 
   useEffect(() => {
@@ -181,6 +123,17 @@ export default function Home() {
           />
         </div>
       </div>
+
+      <p className="text-white text-xs">
+        Created by{' '}
+        <a
+          href="https://github.com/johnfrades"
+          target="_blank"
+          className="text-blue-500"
+        >
+          John Frades
+        </a>
+      </p>
     </div>
   );
 }

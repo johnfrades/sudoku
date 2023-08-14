@@ -42,7 +42,7 @@ function getColumn(cell: number) {
 }
 
 // given a sudoku cell, returns the 3x3 block
-function getBlock(cell: number) {
+export function getBlock(cell: number) {
   return Math.floor(getRow(cell) / 3) * 3 + Math.floor(getColumn(cell) / 3);
 }
 

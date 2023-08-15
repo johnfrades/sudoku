@@ -20,6 +20,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - Instant highlighting of errors
 - 5 difficulties (Baby, Easy, Medium, Hard, Expert)
 - Load puzzles from the Supabase
+- Solve the current Sudoku Board
+- Clear the current board
 
 
 ### Difficulties

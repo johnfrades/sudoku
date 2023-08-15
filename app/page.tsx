@@ -156,13 +156,15 @@ export default function Home() {
           />
         </div>
 
-        <div className="mt-5">
-          <h3 className="text-white text-lg">Options</h3>
-          <div className="flex gap-4 mt-2">
-            <Button onClick={onClearSudokuBoard}>Clear Board</Button>
-            <Button onClick={onSolveSudokuBoard}>Solve It</Button>
+        {!puzzleSolved && (
+          <div className="mt-5">
+            <h3 className="text-white text-lg">Options</h3>
+            <div className="flex gap-4 mt-2">
+              <Button onClick={onClearSudokuBoard}>Clear Board</Button>
+              <Button onClick={onSolveSudokuBoard}>Solve It</Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <p className="text-white text-xs">

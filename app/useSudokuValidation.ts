@@ -233,6 +233,10 @@ export const useSudokuValidation = (
     const currentBlock = getBlock(cell);
     newCopy[rowIdx][colIdx].value = value;
 
+    if (value === '.') {
+      newCopy[rowIdx][colIdx].hasError = false;
+    }
+
     const allExistingErrors = getAllExistingErrors(newCopy);
 
     validateTheBlocks({
@@ -242,13 +246,16 @@ export const useSudokuValidation = (
       allExistingErrors,
     });
     validateExistingErrorsForRowCol(newCopy, cellCandidates, allExistingErrors);
-    validateRowColumnOfNewlyInputtedValue({
-      value,
-      cellCandidates,
-      colIdx,
-      rowIdx,
-      newCopy,
-    });
+    if (value !== '.') {
+      validateRowColumnOfNewlyInputtedValue({
+        value,
+        cellCandidates,
+        colIdx,
+        rowIdx,
+        newCopy,
+      });
+    }
+
     setCandidatesErrorStatus(newCopy, cellCandidates);
 
     setSudokuData(newCopy);

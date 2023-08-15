@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Puzzle } from '@/types/puzzle';
 import { Database } from '@/database.types';
@@ -83,6 +83,17 @@ export default function Home() {
     setPuzzleSolved(solved);
   }, [sudokuData]);
 
+  const onClearSudokuBoard = () => {
+    const clearedSudokuData = sudokuData.map((sudokuArray) => {
+      return sudokuArray.map((data) => ({
+        ...data,
+        value: data.isDisabled ? data.value : '.',
+        hasError: false,
+      }));
+    });
+    setSudokuData(clearedSudokuData);
+  };
+
   return (
     <div className="grid h-screen place-items-center">
       <div>
@@ -121,6 +132,18 @@ export default function Home() {
             fromServerPuzzle={fromServerPuzzle}
             onUsePuzzleData={onUsePuzzleData}
           />
+        </div>
+
+        <div className="mt-5">
+          <h3 className="text-white text-xl">Options</h3>
+          <div className="flex gap-4 mt-2">
+            <button
+              onClick={onClearSudokuBoard}
+              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+            >
+              Clear Board
+            </button>
+          </div>
         </div>
       </div>
 

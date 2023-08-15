@@ -1,9 +1,21 @@
 import { Dispatch, SetStateAction } from 'react';
 import { deepCopy } from '@/utils/deepCopy';
 import { getBlock } from '@/utils/generateSudokuData';
-import { differenceWith, flatten, isEqual, set } from 'lodash';
+import { flatten, set, uniq } from 'lodash';
 import { SudokuData } from '@/types/sudokuData';
 import { CellCandidate } from '@/types/cellCandidate';
+
+const getAllExistingErrors = (newCopy: SudokuData[][]) =>
+  newCopy.reduce((acc, cur) => {
+    const errors = cur.filter((x) => x.hasError);
+    if (errors.length > 0) {
+      errors.forEach((error) => {
+        acc.push(error);
+      });
+    }
+
+    return acc;
+  }, []);
 
 const getCellIndexByRowCol = (row: number, col: number) => {
   return row * 9 + col;
@@ -41,16 +53,6 @@ const getDuplicates = (data: SudokuData[]) => {
   return duplicates;
 };
 
-// Only get the errors in the block that is not caused by duplicated in the block
-// This means, they're error by Row Col
-const getCurrentErrorsInBlock = (
-  data: SudokuData[],
-  duplicates: SudokuData[]
-): SudokuData[] => {
-  const filteredErrors = data.filter((x) => x.hasError);
-  if (!filteredErrors) return [];
-  return differenceWith(filteredErrors, duplicates, isEqual);
-};
 const validateValueInRowAndColumn = (
   newCopy: SudokuData[][],
   rowIdx: number,
@@ -66,21 +68,11 @@ const validateValueInRowAndColumn = (
   return { existsInCol, existsInRow };
 };
 
-const validateExistingErrors = (
+const validateExistingErrorsForRowCol = (
   newCopy: SudokuData[][],
-  candidate: CellCandidate
+  candidate: CellCandidate,
+  allExistingErrors: SudokuData[]
 ) => {
-  const allExistingErrors = newCopy.reduce((acc, cur) => {
-    const errors = cur.filter((x) => x.hasError);
-    if (errors.length > 0) {
-      errors.forEach((error) => {
-        acc.push(error);
-      });
-    }
-
-    return acc;
-  }, []);
-
   allExistingErrors.forEach((fieldError) => {
     const { existsInCol, existsInRow } = validateValueInRowAndColumn(
       newCopy,
@@ -117,25 +109,6 @@ const validateExistingErrors = (
         rowColError: true,
       });
     }
-  });
-};
-
-const setBlockError = (
-  duplicates: SudokuData[],
-  errorsInBlock: SudokuData[],
-  candidate: CellCandidate
-) => {
-  duplicates.forEach((duplicate) => {
-    const rowColKey = String(duplicate.row) + String(duplicate.col);
-    set(candidate, rowColKey, {
-      blockError: true,
-    });
-  });
-  errorsInBlock.forEach((error) => {
-    const rowColKey = String(error.row) + String(error.col);
-    set(candidate, rowColKey, {
-      blockError: false,
-    });
   });
 };
 
@@ -203,6 +176,47 @@ const setCandidatesErrorStatus = (
   }
 };
 
+type ValidateTheBlocksProps = {
+  newCopy: SudokuData[][];
+  cellCandidates: CellCandidate;
+  currentBlockOfInputtedValue: number;
+  allExistingErrors: SudokuData[];
+};
+
+const validateTheBlocks = ({
+  newCopy,
+  cellCandidates,
+  currentBlockOfInputtedValue,
+  allExistingErrors,
+}: ValidateTheBlocksProps) => {
+  const blocksWithError = getTheBlocksByRowCol(allExistingErrors);
+  const blocksToCheck = uniq(
+    blocksWithError.concat(currentBlockOfInputtedValue)
+  );
+
+  blocksToCheck.forEach((block) => {
+    const allValuesInTheCurrentBlock = getAllValuesInTheCurrentBlock(
+      newCopy,
+      block
+    );
+    const duplicates = getDuplicates(allValuesInTheCurrentBlock);
+    duplicates.forEach((duplicate) => {
+      const rowColKey = String(duplicate.row) + String(duplicate.col);
+      set(cellCandidates, rowColKey, {
+        blockError: true,
+      });
+    });
+  });
+};
+
+const getTheBlocksByRowCol = (data: SudokuData[]) => {
+  const blocks = data.map((sudoku) => {
+    const cell = getCellIndexByRowCol(sudoku.row, sudoku.col);
+    return getBlock(cell);
+  });
+  return uniq(blocks);
+};
+
 export const useSudokuValidation = (
   sudokuData: SudokuData[][],
   setSudokuData: Dispatch<SetStateAction<SudokuData[][]>>
@@ -215,32 +229,19 @@ export const useSudokuValidation = (
     const newCopy = deepCopy(sudokuData);
     const cellCandidates: CellCandidate = {};
 
-    // Get the block of where you put the number, get all values, if there's duplicate
-    // get the duplicate values and mark them blockError `true` and push to cellCandidates array
-    // If there's no duplicate, get all current errors in the values, if there's errors
-    // mark them blockError `false` and push to cellCandidates array
     const cell = getCellIndexByRowCol(rowIdx, colIdx);
     const currentBlock = getBlock(cell);
     newCopy[rowIdx][colIdx].value = value;
 
-    const allValuesInTheCurrentBlock = getAllValuesInTheCurrentBlock(
+    const allExistingErrors = getAllExistingErrors(newCopy);
+
+    validateTheBlocks({
       newCopy,
-      currentBlock
-    );
-    const duplicates = getDuplicates(allValuesInTheCurrentBlock);
-    const errorsInBlock = getCurrentErrorsInBlock(
-      allValuesInTheCurrentBlock,
-      duplicates
-    );
-
-    setBlockError(duplicates, errorsInBlock, cellCandidates);
-
-    // Get the existing errors, loop through them,
-    // validate the column and row, if there's still duplicate, mark them rowColError `true`
-    // if none, rowColError `false`
-    validateExistingErrors(newCopy, cellCandidates);
-
-    // Validate the row and column of the newly inputed value
+      cellCandidates,
+      currentBlockOfInputtedValue: currentBlock,
+      allExistingErrors,
+    });
+    validateExistingErrorsForRowCol(newCopy, cellCandidates, allExistingErrors);
     validateRowColumnOfNewlyInputtedValue({
       value,
       cellCandidates,
@@ -248,10 +249,6 @@ export const useSudokuValidation = (
       rowIdx,
       newCopy,
     });
-
-    // Now for setting the sudoku data
-    // Remove error = rowColError is false and blockError is false
-    // Add error = either rowColError or blockError is true
     setCandidatesErrorStatus(newCopy, cellCandidates);
 
     setSudokuData(newCopy);

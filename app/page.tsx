@@ -160,9 +160,9 @@ export default function Home() {
         </div>
 
         {!puzzleSolved && (
-          <div className="mt-5">
+          <div className="mt-5 px-5 sm:px-0">
             <h3 className="text-white text-lg">Options</h3>
-            <div className="flex gap-4 mt-2">
+            <div className="flex gap-4 mt-2 flex-wrap">
               <Button onClick={onClearSudokuBoard}>Clear Board</Button>
               <Button onClick={onSolveSudokuBoard}>Solve It</Button>
             </div>

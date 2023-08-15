@@ -23,9 +23,9 @@ const LoadPuzzlesFromServer: React.FC<LoadPuzzlesFromServerProps> = ({
   errorMessage,
 }) => {
   return (
-    <>
+    <div className="px-5 sm:px-0">
       <h3 className="text-white text-lg">Load Puzzles from the Server</h3>
-      <div className="flex gap-4 mt-2">
+      <div className="flex gap-4 mt-2 flex-wrap">
         {errorMessage && <ErrorMessage errorMessage={errorMessage} />}
         {isLoading ? (
           <Spinner />
@@ -43,7 +43,7 @@ const LoadPuzzlesFromServer: React.FC<LoadPuzzlesFromServerProps> = ({
           ))
         )}
       </div>
-    </>
+    </div>
   );
 };
 

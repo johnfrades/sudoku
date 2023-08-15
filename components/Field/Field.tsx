@@ -14,7 +14,7 @@ const Field: React.FC<InputProps> = ({ value, disabled, hasError }) => {
   const hasErrorClass = hasError ? 'border-4 border-solid border-red-500' : '';
   return (
     <div
-      className={`select-none border flex items-center justify-center w-14 h-14 md:w-20 md:h-20 text-lg md:text-2xl ${conditionalClass} ${hasErrorClass}`}
+      className={`select-none border flex items-center m-auto justify-center w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 text-sm sm:text-lg md:text-2xl ${conditionalClass} ${hasErrorClass}`}
     >
       {value}
     </div>

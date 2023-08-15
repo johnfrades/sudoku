@@ -12,9 +12,9 @@ const PuzzleDifficultyGroup: React.FC<PuzzleDifficultyGroupProps> = ({
   setSelectedPuzzle,
 }) => {
   return (
-    <>
+    <div className="px-5 sm:px-0">
       <h3 className="text-white text-lg">Generate Random Puzzle</h3>
-      <div className="flex gap-4 mt-2">
+      <div className="flex gap-4 mt-2 flex-wrap">
         {Object.values(PuzzleDifficulty)
           .filter((x) => typeof x === 'number')
           .map((difficulty) => (
@@ -29,7 +29,7 @@ const PuzzleDifficultyGroup: React.FC<PuzzleDifficultyGroupProps> = ({
             </Button>
           ))}
       </div>
-    </>
+    </div>
   );
 };
 

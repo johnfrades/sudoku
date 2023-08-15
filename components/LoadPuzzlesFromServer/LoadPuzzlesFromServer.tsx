@@ -1,6 +1,7 @@
 import React from 'react';
 import Spinner from '@/components/Spinner';
 import { Puzzle } from '@/types/puzzle';
+import Button from '@/components/Button';
 
 type LoadPuzzlesFromServerProps = {
   isLoading: boolean;
@@ -23,16 +24,15 @@ const LoadPuzzlesFromServer: React.FC<LoadPuzzlesFromServerProps> = ({
           <Spinner />
         ) : (
           fromServerPuzzle.map((data, idx) => (
-            <button
+            <Button
               onClick={() => {
                 onUsePuzzleData(data);
                 setSelectedPuzzle(`Puzzle ${idx + 1}`);
               }}
               key={data.id}
-              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
             >
               Puzzle {idx + 1}
-            </button>
+            </Button>
           ))
         )}
       </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { PuzzleDifficulty } from '@/enums/PuzzleDifficulty';
 import { capitalize } from 'lodash';
+import Button from '@/components/Button';
 
 type PuzzleDifficultyGroupProps = {
   onGenerateRandomSudoku: (difficulty: PuzzleDifficulty) => void;
@@ -17,16 +18,15 @@ const PuzzleDifficultyGroup: React.FC<PuzzleDifficultyGroupProps> = ({
         {Object.values(PuzzleDifficulty)
           .filter((x) => typeof x === 'number')
           .map((difficulty) => (
-            <button
+            <Button
               onClick={() => {
                 onGenerateRandomSudoku(+difficulty);
                 setSelectedPuzzle(capitalize(PuzzleDifficulty[+difficulty]));
               }}
               key={difficulty}
-              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
             >
               {capitalize(PuzzleDifficulty[+difficulty])}
-            </button>
+            </Button>
           ))}
       </div>
     </>

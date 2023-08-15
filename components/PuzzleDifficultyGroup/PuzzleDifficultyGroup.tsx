@@ -13,7 +13,7 @@ const PuzzleDifficultyGroup: React.FC<PuzzleDifficultyGroupProps> = ({
 }) => {
   return (
     <>
-      <h3 className="text-white text-xl">Generate Random Puzzle</h3>
+      <h3 className="text-white text-lg">Generate Random Puzzle</h3>
       <div className="flex gap-4 mt-2">
         {Object.values(PuzzleDifficulty)
           .filter((x) => typeof x === 'number')

@@ -3,10 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Puzzle } from '@/types/puzzle';
 import { Database } from '@/database.types';
-import { convertPuzzleString } from '@/utils/convertPuzzleString';
+import { convertToSudokuData } from '@/utils/convertToSudokuData';
 import { deepCopy } from '@/utils/deepCopy';
 import { SudokuData } from '@/types/sudokuData';
-import { generateSudokuData, isSolvedSudoku } from '@/utils/generateSudokuData';
+import {
+  generateSudokuData,
+  isSolvedSudoku,
+  solve,
+} from '@/utils/generateSudokuData';
 import { PuzzleDifficulty } from '@/enums/PuzzleDifficulty';
 import PuzzleDifficultyGroup from '@/components/PuzzleDifficultyGroup';
 import LoadPuzzlesFromServer from '@/components/LoadPuzzlesFromServer';
@@ -14,6 +18,7 @@ import SudokuBoard from '@/components/SudokuBoard';
 import { flatten } from 'lodash';
 import { useSudokuValidation } from '@/app/useSudokuValidation';
 import Button from '@/components/Button';
+import { convertToPuzzleString } from '@/utils/convertToPuzzleString';
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,12 +56,12 @@ export default function Home() {
 
   const onGenerateRandomSudoku = (puzzleDifficulty: PuzzleDifficulty) => {
     const solvedString = generateSudokuData(puzzleDifficulty);
-    const transformedPuzzleData = convertPuzzleString(solvedString);
+    const transformedPuzzleData = convertToSudokuData(solvedString);
     setSudokuData(deepCopy(transformedPuzzleData));
   };
 
   const onUsePuzzleData = (data: Puzzle) => {
-    const transformedPuzzleData = convertPuzzleString(data.puzzle);
+    const transformedPuzzleData = convertToSudokuData(data.puzzle);
     setSudokuData(deepCopy(transformedPuzzleData));
   };
 
@@ -95,6 +100,22 @@ export default function Home() {
     setSudokuData(clearedSudokuData);
   };
 
+  const onSolveSudokuBoard = () => {
+    const clearedSudokuData = sudokuData.map((sudokuArray) => {
+      return sudokuArray.map((data) => ({
+        ...data,
+        value: data.isDisabled ? data.value : '.',
+        hasError: false,
+      }));
+    });
+    const convertedData = convertToPuzzleString(clearedSudokuData).map(
+      (value) => (value === '.' ? 0 : +value)
+    );
+    const solvedPuzzleString = solve(convertedData).join('');
+    const convertedSudokuData = convertToSudokuData(solvedPuzzleString);
+    setSudokuData(convertedSudokuData);
+  };
+
   return (
     <div className="grid h-screen place-items-center">
       <div>
@@ -119,14 +140,14 @@ export default function Home() {
           </h2>
         )}
 
-        <div className="mt-10">
+        <div className="mt-5">
           <PuzzleDifficultyGroup
             setSelectedPuzzle={setSelectedPuzzle}
             onGenerateRandomSudoku={onGenerateRandomSudoku}
           />
         </div>
 
-        <div className="mt-10">
+        <div className="mt-5">
           <LoadPuzzlesFromServer
             setSelectedPuzzle={setSelectedPuzzle}
             isLoading={isLoading}
@@ -136,9 +157,10 @@ export default function Home() {
         </div>
 
         <div className="mt-5">
-          <h3 className="text-white text-xl">Options</h3>
+          <h3 className="text-white text-lg">Options</h3>
           <div className="flex gap-4 mt-2">
             <Button onClick={onClearSudokuBoard}>Clear Board</Button>
+            <Button onClick={onSolveSudokuBoard}>Solve It</Button>
           </div>
         </div>
       </div>

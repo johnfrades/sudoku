@@ -217,8 +217,7 @@ function nextRandom(possible: number[][]): number {
   return minChoices;
 }
 
-// given a sudoku, solves it
-function solve(sudoku: number[]) {
+export function solve(sudoku: number[]) {
   const saved: number[][] = [];
   const savedSudoku: number[] = [];
   let copiedSudoku = [...sudoku];

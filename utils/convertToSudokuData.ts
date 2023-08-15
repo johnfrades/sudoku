@@ -1,6 +1,6 @@
 import { SudokuData } from '@/types/sudokuData';
 
-export const convertPuzzleString = (puzzleString: string): SudokuData[][] => {
+export const convertToSudokuData = (puzzleString: string): SudokuData[][] => {
   const splitData = puzzleString.split('');
   const puzzleArr: SudokuData[][] = [];
   let row = 0;

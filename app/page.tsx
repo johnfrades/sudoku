@@ -121,7 +121,10 @@ export default function Home() {
   return (
     <div className="grid h-screen place-items-center">
       <div>
-        <h1 className="text-4xl font-semibold text-white text-center">
+        <h1
+          data-testid="title"
+          className="text-4xl font-semibold text-white text-center"
+        >
           Sudoku-Mobbin
         </h1>
         <h6 className="text-center text-amber-100">

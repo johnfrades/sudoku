@@ -4,9 +4,10 @@ type InputProps = {
   value: string;
   disabled: boolean;
   hasError: boolean;
+  point: { row: number; col: number };
 };
 
-const Field: React.FC<InputProps> = ({ value, disabled, hasError }) => {
+const Field: React.FC<InputProps> = ({ value, disabled, hasError, point }) => {
   const conditionalClass = disabled
     ? 'cursor-not-allowed bg-amber-200'
     : 'bg-white cursor-pointer hover:bg-green-100';
@@ -14,6 +15,7 @@ const Field: React.FC<InputProps> = ({ value, disabled, hasError }) => {
   const hasErrorClass = hasError ? 'border-4 border-solid border-red-500' : '';
   return (
     <div
+      data-testId={`row-col-${point.row}${point.col}`}
       className={`select-none border flex items-center m-auto justify-center w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 text-sm sm:text-lg md:text-2xl ${conditionalClass} ${hasErrorClass}`}
     >
       {value}

@@ -61,6 +61,7 @@ const SudokuBoard: React.FC<SudokuBoardProps> = ({
                       }
                     >
                       <Field
+                        point={{ row: rowIndex, col: colIndex }}
                         hasError={get(
                           sudokuData,
                           `[${row}][${col}].hasError`,

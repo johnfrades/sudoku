@@ -14,21 +14,114 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Sudoku Features
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- Generate Random Puzzle
+- Instant highlighting of errors
+- 5 difficulties (Baby, Easy, Medium, Hard, Expert)
+- Load puzzles from the Supabase
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+### Difficulties
+Difficulty represents the number of empty fields 
+    
+    Baby = 20
+    Easy = 30
+    Medium = 40
+    Hard = 50
+    Expert = 60
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Puzzle data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+This is the raw puzzle data, `81` in characters length
 
-## Deploy on Vercel
+    "52...6.........7.13...........4..8..6......5...........418.........3..2...87....."
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+That will be converted to a 2D Array
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```
+[
+    [
+        {
+            value: "5",
+            hasError: false,
+            isDisabled: true,
+            row: 0,
+            col: 0
+        },
+        {
+            value: "2",
+            hasError: false,
+            isDisabled: true,
+            row: 0,
+            col: 1
+        },
+        {
+            value: ".",
+            hasError: false,
+            isDisabled: false,
+            row: 0,
+            col: 2
+        }
+    ]........
+]
+```
+
+---
+
+### Puzzle Generation
+- Function used = `generateSudokuData` in `utils/generateSudokuData.ts`
+- User can choose a difficulty, for example if they chose `Medium`, we'll run the `generateSudokuData`
+  that will solved an empty board using an algorithm that on every generation is randomize
+- Once the solved board is generated, we'll use the value of `Medium` difficulty which is `40`,
+which then gonna run a function that will output a randomize number from `0` to `81` (non-repeatable) in `40` runs
+- The 40 numbers generated will be the indexes of the Sudoku Data we'll convert to an empty field
+
+- if the user loads puzzles from server, it will just load it straight into the sudoku board
+---
+
+### Puzzle Validation
+First the Whole Sudoku Board is represented like this, we call it `Block` 
+
+    0 0 0 | 1 1 1 | 2 2 2  
+    0 0 0 | 1 1 1 | 2 2 2   
+    0 0 0 | 1 1 1 | 2 2 2   
+    ------+-------+------
+    3 3 3 | 4 4 4 | 5 5 5   
+    3 3 3 | 4 4 4 | 5 5 5   
+    3 3 3 | 4 4 4 | 5 5 5   
+    ------+-------+------
+    6 6 6 | 7 7 7 | 8 8 8   
+    6 6 6 | 7 7 7 | 8 8 8   
+    6 6 6 | 7 7 7 | 8 8 8
+
+This is `Block 0`
+
+    0 0 0 |   
+    0 0 0 |
+    0 0 0 |  
+
+This is `Block 4`
+
+    | 4 4 4 |   
+    | 4 4 4 |   
+    | 4 4 4 | 
+   
+- When the user enters a value in `Block 3`, we get all the values in the whole `Block 3`, and check for duplicate
+values in the block. If there's a duplicate value, we get the `row` and `column` index of both duplicated values and we 
+mark it `blockError: true` 
+- After that, we get all the values in the whole `Block 3` that has `hasError: true` property, that's not caused by a 
+duplicate value in block, how do we determine that? We cross-reference it to our `duplicates` array and return
+the values that's not in the `duplicates` array. We then mark it `blockError: false`
+- Then now we get all the existing errors in our array that has `hasError: true`, loop through each of them and
+validate the `row` and `column` to look for duplicates, if there's a duplicate value detected, mark it `rowColError: true`
+else if no duplicate, mark it `rowColError: false`
+- Now on our final step of validation, all of this marking them by `blockError` and `rowColError` are put in the `cellCandidates`
+object, which will determine the value of the `hasError`, so basically, if either `blockError` and `rowColError` is true,
+then we set the `hasError: true` of that specific row and column data, else if both values are false, we set `hasError: false`
+
+
+---
+
+
+Represents the following board:

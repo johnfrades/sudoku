@@ -32,6 +32,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPuzzle, setSelectedPuzzle] = useState('');
   const [puzzleSolved, setPuzzleSolved] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const { validateBlockRowAndColumn } = useSudokuValidation(
     sudokuData,
@@ -42,8 +43,9 @@ export default function Home() {
     const init = async () => {
       setIsLoading(true);
       const { data, error } = await supabase.from('sudoku_puzzles').select();
-      if (!data) {
-        console.log('No saved data in database');
+      if (error || !data) {
+        setServerError(error?.message || 'No saved data in database');
+        setIsLoading(false);
         return;
       }
       setIsLoading(false);
@@ -149,6 +151,7 @@ export default function Home() {
 
         <div className="mt-5">
           <LoadPuzzlesFromServer
+            errorMessage={serverError}
             setSelectedPuzzle={setSelectedPuzzle}
             isLoading={isLoading}
             fromServerPuzzle={fromServerPuzzle}

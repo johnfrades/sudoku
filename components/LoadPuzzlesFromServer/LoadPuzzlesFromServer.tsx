@@ -8,6 +8,11 @@ type LoadPuzzlesFromServerProps = {
   fromServerPuzzle: Puzzle[];
   onUsePuzzleData: (puzzle: Puzzle) => void;
   setSelectedPuzzle: (puzzle: string) => void;
+  errorMessage: string;
+};
+
+const ErrorMessage: React.FC<{ errorMessage: string }> = ({ errorMessage }) => {
+  return <p className="text-red-500 font-semibold">{errorMessage}</p>;
 };
 
 const LoadPuzzlesFromServer: React.FC<LoadPuzzlesFromServerProps> = ({
@@ -15,11 +20,13 @@ const LoadPuzzlesFromServer: React.FC<LoadPuzzlesFromServerProps> = ({
   fromServerPuzzle,
   onUsePuzzleData,
   setSelectedPuzzle,
+  errorMessage,
 }) => {
   return (
     <>
       <h3 className="text-white text-lg">Load Puzzles from the Server</h3>
       <div className="flex gap-4 mt-2">
+        {errorMessage && <ErrorMessage errorMessage={errorMessage} />}
         {isLoading ? (
           <Spinner />
         ) : (

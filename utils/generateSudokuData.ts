@@ -117,7 +117,7 @@ function isCorrectRow(row: number, sudoku: number[]): boolean {
 // given a column and a sudoku, returns true if it's a legal column
 function isCorrectCol(col: number, sudoku: number[]) {
   const rightSequence = Array.from(Array(9).keys()).map((x) => x + 1);
-  const colTemp = new Array();
+  const colTemp = [];
   for (let i = 0; i <= 8; i++) {
     colTemp[i] = sudoku[col + i * 9];
   }

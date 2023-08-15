@@ -110,11 +110,9 @@ This is `Block 4`
 - When the user enters a value in `Block 3`, we get all the values in the whole `Block 3`, and check for duplicate
 values in the block. If there's a duplicate value, we get the `row` and `column` index of both duplicated values and we 
 mark it `blockError: true` 
-- After that, we get all the values in the whole `Block 3` that has `hasError: true` property, that's not caused by a 
-duplicate value in block, how do we determine that? We cross-reference it to our `duplicates` array and return
-the values that's not in the `duplicates` array. We then mark it `blockError: false`
-- Then now we get all the existing errors in our array that has `hasError: true`, loop through each of them and
-validate the `row` and `column` to look for duplicates, if there's a duplicate value detected, mark it `rowColError: true`
+- After that, we get all the sudoku data that has error `hasError: true`, we then get which block is that data belongs to,
+then we do validation on those blocks for duplicate values in the block, mark it `blockError: true` if theres a duplicate
+- And we do validation now on Row and Columns on each sudoku data that has errors, if there's a duplicate value detected, mark it `rowColError: true`
 else if no duplicate, mark it `rowColError: false`
 - Now on our final step of validation, all of this marking them by `blockError` and `rowColError` are put in the `cellCandidates`
 object, which will determine the value of the `hasError`, so basically, if either `blockError` and `rowColError` is true,

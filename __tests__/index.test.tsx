@@ -149,4 +149,42 @@ describe('Sudoku', () => {
       getByTestId(`row-col-01`).classList.contains('border-red-500')
     ).toBeFalsy();
   });
+
+  it('should validate the Block, Column and Row after entering a number', async () => {
+    const { getByTestId, getByRole } = render(<Home />);
+    await waitFor(() => {
+      getByRole('button', {
+        name: 'Puzzle 4',
+      });
+    });
+
+    const puzzle4Button = getByRole('button', {
+      name: 'Puzzle 4',
+    });
+    await userEvent.click(puzzle4Button);
+    await userEvent.click(getByTestId(`row-col-10`));
+
+    await waitFor(() => getByTestId('numpad-box'));
+
+    const numpad7 = getByRole('button', {
+      name: '7',
+    });
+
+    await userEvent.click(numpad7);
+
+    expect(getByTestId(`row-col-10`).textContent).toBe('7');
+
+    expect(
+      getByTestId(`row-col-10`).classList.contains('border-red-500')
+    ).toBeTruthy();
+    expect(
+      getByTestId(`row-col-21`).classList.contains('border-red-500')
+    ).toBeTruthy();
+    expect(
+      getByTestId(`row-col-18`).classList.contains('border-red-500')
+    ).toBeTruthy();
+    expect(
+      getByTestId(`row-col-80`).classList.contains('border-red-500')
+    ).toBeTruthy();
+  });
 });

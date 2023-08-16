@@ -6,7 +6,7 @@ import Button from '@/components/Button';
 type LoadPuzzlesFromServerProps = {
   isLoading: boolean;
   fromServerPuzzle: Puzzle[];
-  onUsePuzzleData: (puzzle: Puzzle) => void;
+  onSelectPuzzleData: (puzzle: Puzzle) => void;
   setSelectedPuzzle: (puzzle: string) => void;
   errorMessage: string;
 };
@@ -18,7 +18,7 @@ const ErrorMessage: React.FC<{ errorMessage: string }> = ({ errorMessage }) => {
 const LoadPuzzlesFromServer: React.FC<LoadPuzzlesFromServerProps> = ({
   isLoading,
   fromServerPuzzle,
-  onUsePuzzleData,
+  onSelectPuzzleData,
   setSelectedPuzzle,
   errorMessage,
 }) => {
@@ -33,7 +33,7 @@ const LoadPuzzlesFromServer: React.FC<LoadPuzzlesFromServerProps> = ({
           fromServerPuzzle.map((data, idx) => (
             <Button
               onClick={() => {
-                onUsePuzzleData(data);
+                onSelectPuzzleData(data);
                 setSelectedPuzzle(`Puzzle ${idx + 1}`);
               }}
               key={data.id}

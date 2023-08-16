@@ -68,7 +68,7 @@ const validateValueInRowAndColumn = (
   return { existsInCol, existsInRow };
 };
 
-const validateExistingErrorsForRowCol = (
+const validateRowsAndColumns = (
   newCopy: SudokuData[][],
   candidate: CellCandidate,
   allExistingErrors: SudokuData[]
@@ -245,7 +245,8 @@ export const useSudokuValidation = (
       currentBlockOfInputtedValue: currentBlock,
       allExistingErrors,
     });
-    validateExistingErrorsForRowCol(newCopy, cellCandidates, allExistingErrors);
+    validateRowsAndColumns(newCopy, cellCandidates, allExistingErrors);
+
     if (value !== '.') {
       validateRowColumnOfNewlyInputtedValue({
         value,

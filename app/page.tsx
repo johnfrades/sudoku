@@ -15,9 +15,9 @@ import LoadPuzzlesFromServer from '@/components/LoadPuzzlesFromServer';
 import SudokuBoard from '@/components/SudokuBoard';
 import { flatten } from 'lodash';
 import { useSudokuValidation } from '@/app/useSudokuValidation';
-import Button from '@/components/Button';
 import { convertToPuzzleString } from '@/utils/convertToPuzzleString';
 import { supabase } from '@/utils/supabaseClient';
+import Options from '@/components/Options';
 
 export default function Home() {
   const [isPopoverOpen, setIsPopoverOpen] = useState('');
@@ -56,7 +56,7 @@ export default function Home() {
     setSudokuData(deepCopy(transformedPuzzleData));
   };
 
-  const onUsePuzzleData = (data: Puzzle) => {
+  const onSelectPuzzleData = (data: Puzzle) => {
     const transformedPuzzleData = convertToSudokuData(data.puzzle);
     setSudokuData(deepCopy(transformedPuzzleData));
   };
@@ -152,17 +152,16 @@ export default function Home() {
             setSelectedPuzzle={setSelectedPuzzle}
             isLoading={isLoading}
             fromServerPuzzle={fromServerPuzzle}
-            onUsePuzzleData={onUsePuzzleData}
+            onSelectPuzzleData={onSelectPuzzleData}
           />
         </div>
 
         {!puzzleSolved && (
-          <div className="mt-5 px-5 sm:px-0">
-            <h3 className="text-white text-lg">Options</h3>
-            <div className="flex gap-4 mt-2 flex-wrap">
-              <Button onClick={onClearSudokuBoard}>Clear Board</Button>
-              <Button onClick={onSolveSudokuBoard}>Solve It</Button>
-            </div>
+          <div className="mt-5">
+            <Options
+              onClearSudokuBoard={onClearSudokuBoard}
+              onSolveSudokuBoard={onSolveSudokuBoard}
+            />
           </div>
         )}
       </div>

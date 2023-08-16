@@ -37,7 +37,10 @@ const NumpadPopup: React.FC<NumpadPopupProps> = ({
           className="popover-arrow-container"
           arrowClassName="popover-arrow"
         >
-          <div className="max-w-[200px] bg-white px-5 py-6 border-2 rounded-lg border-gray-400 border-solid">
+          <div
+            className="max-w-[200px] bg-white px-5 py-6 border-2 rounded-lg border-gray-400 border-solid"
+            data-testId="numpad-box"
+          >
             <div className="grid grid-cols-3 gap-1 justify-center items-center">
               {nineItems.map((item) => (
                 <Button

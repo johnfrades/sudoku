@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "jest",
     "type-check": "tsc --project tsconfig.json --pretty --noEmit",
-    "postinstall": "husky install"
+    "postinstall": "husky install",
+    "prettier": "prettier"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.32.0",

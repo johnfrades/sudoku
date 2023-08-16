@@ -1,8 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { Puzzle } from '@/types/puzzle';
-import { Database } from '@/database.types';
 import { convertToSudokuData } from '@/utils/convertToSudokuData';
 import { deepCopy } from '@/utils/deepCopy';
 import { SudokuData } from '@/types/sudokuData';
@@ -19,11 +17,7 @@ import { flatten } from 'lodash';
 import { useSudokuValidation } from '@/app/useSudokuValidation';
 import Button from '@/components/Button';
 import { convertToPuzzleString } from '@/utils/convertToPuzzleString';
-
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from '@/utils/supabaseClient';
 
 export default function Home() {
   const [isPopoverOpen, setIsPopoverOpen] = useState('');
